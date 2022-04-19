@@ -23,6 +23,7 @@ public class GreenTree {
 		//TreeNode.printTree(this.getRoot(), "-");
 		for (TreeNode<Donnee> child : root.getChildren()) {
 			Somme = (Somme + child.getData().getConso());
+                        TreeNode.printTree(child," ");
 		}
 	}
 	

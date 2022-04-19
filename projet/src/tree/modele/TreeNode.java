@@ -52,7 +52,7 @@ return parent;
 	
 public static <T> void printTree(TreeNode<T> node, String appender) {
   System.out.println(appender + node.getData());
-  node.getChildren().forEach(each ->  printTree(each, appender + appender));
+  node.getChildren().forEach(each ->  printTree(each, appender));
 }
 
 }

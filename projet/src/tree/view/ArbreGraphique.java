@@ -50,7 +50,9 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafxdragpanzoom.view.controls.DragManager;
 import javafxdragpanzoom.view.views.TranslatableHomotheticPane;
+import javafxdragpanzoom.view.views.TranslatableHomotheticPaneRect;
 import tree.io.Main;
 import tree.modele.*;
 
@@ -88,22 +90,6 @@ public class ArbreGraphique extends TranslatableHomotheticPane {
 		this.treeLayout = treeLayout;
 	}
 
-	// -------------------------------------------------------------------
-	// generating
-
-//	private void generateEdges(StringBuilder result, TextInBox parent) {
-//		if (!getTree().isLeaf(parent)) {
-//			Rectangle2D.Double b1 = getBoundsOfNode(parent);
-//			double x1 = b1.getCenterX();
-//			double y1 = b1.getCenterY();
-//			for (TextInBox child : getChildren(parent)) {
-//				Rectangle2D.Double b2 = getBoundsOfNode(child);
-//				result.append(line(x1, y1, b2.getCenterX(), b2.getCenterY(),
-//						"stroke:rgb(78, 22, 9); stroke-width:4px;"));
-//				generateEdges(result, child);
-//			}
-//		}
-//	}
 	/**
 	 * changer l affichage de % a watts.
 	 * 
@@ -155,51 +141,9 @@ public class ArbreGraphique extends TranslatableHomotheticPane {
 			}
 		}
 	}
-//	private void generateBox(StringBuilder result, TextInBox textInBox) {
-//		Rectangle2D.Double box;
-//		// draw the text on top of the box (possibly multiple lines)
-//		String[] lines = textInBox.text.split("[\n]");
-//		List<Double> seuil; 
-//				if (lines[0].contains("%")) {
-//					seuil = Arrays.asList(20.0, 40.0, 60.0);
-//				}
-//				else {
-//					seuil =Arrays.asList(GreenTree.Somme*0.2, GreenTree.Somme*0.4, GreenTree.Somme*0.6);
-//				}
-//				String[] pourcent  =textInBox.text.split("[,%]");
-//				if (pourcent.length > 1) {
-//				
-//		if (Double.parseDouble(pourcent[1]) < seuil.get(0)) {
-//		// draw the box in the background
-//			box = getBoundsOfNode(textInBox);
-//			result.append(rect(box.x + 1, box.y + 1, box.width - 2, box.height - 2,
-//				"fill:rgb(0,200,0); stroke:rgb(0,0,0);", "rx=\"10\""));
-//		}
-//		else if (Double.parseDouble(pourcent[1]) < seuil.get(1) && Double.parseDouble(pourcent[1]) > seuil.get(0)){		
-//			box = getBoundsOfNode(textInBox);
-//			result.append(rect(box.x + 1, box.y + 1, box.width - 2, box.height - 2,
-//					"fill:rgb(255,165,0); stroke:rgb(0,0,0);", "rx=\"10\""));
-//		}
-//		else {
-//			box = getBoundsOfNode(textInBox);
-//			result.append(rect(box.x + 1, box.y + 1, box.width - 2, box.height - 2,
-//					"fill:rgb(165, 38, 10); stroke:rgb(0,0,0);", "rx=\"10\""));
-//		}
-//			int fontSize = 14;
-//			int x = (int) box.x + fontSize / 2 + 2;
-//			int y = (int) box.y + fontSize + 1;
-//			String style = String.format("font-family:sans-serif;font-size:%dpx;",
-//				fontSize);
-//				
-//			for (int i = 0; i < lines.length; i++) {
-//				lines[i] = lines[i].replaceAll("[<>]",""); // correction bug<>
-//				result.append(text(x, y, style, lines[i]));
-//				y += fontSize;
-//			}
-//		}
-//	}
 
 	private void generateBoxFX(TextInBox textInBox, Group root) {
+                TranslatableHomotheticPaneRect rect = new TranslatableHomotheticPaneRect();
 		Rectangle2D.Double box;
 		String[] lines = textInBox.text.split("[\n]");
 		List<Double> seuil;
@@ -221,6 +165,9 @@ public class ArbreGraphique extends TranslatableHomotheticPane {
 			rectangle.setArcWidth(15);
 			// Ajouter le groupe contenant la grille au graphe de scène de ce composant
 			super.getChildren().add(rectangle);
+//                        rect.getChildren().add(rectangle);
+//                        root.getChildren().add(rect);
+//                        new DragManager(rect);
 
 			// Rendre ce groupe transparent aux événements souris
 			rectangle.setMouseTransparent(true);
@@ -239,21 +186,21 @@ public class ArbreGraphique extends TranslatableHomotheticPane {
 			text.setLayoutX(x);
 			text.setLayoutY(y);
 			text.setFont(javafx.scene.text.Font.font(null, FontWeight.MEDIUM, fontSize));
-			text.setOnMousePressed( // add event listener
-					e -> {
-						Point2D offset = new Point2D(e.getX() - rectangle.getLayoutX(),
-								e.getY() - rectangle.getLayoutY());
-						rectangle.setUserData(offset);
-						e.consume();
-					});
-			text.setOnMouseDragged(e -> {
-				Point2D offset = (Point2D) rectangle.getUserData();
-				rectangle.setTranslateX(e.getX() - offset.getX());
-				rectangle.setTranslateY(e.getY() - offset.getY());
-				text.setTranslateX(e.getX() - offset.getX());
-				text.setTranslateY(e.getY() - offset.getY());
-				e.consume();
-			});
+//			text.setOnMousePressed( // add event listener
+//					e -> {
+//						Point2D offset = new Point2D(e.getX() - rectangle.getLayoutX(),
+//								e.getY() - rectangle.getLayoutY());
+//						rectangle.setUserData(offset);
+//						e.consume();
+//					});
+//			text.setOnMouseDragged(e -> {
+//				Point2D offset = (Point2D) rectangle.getUserData();
+//				.rectangle.setTranslateX(e.getX() - offset.getX());
+//				rectangle.setTranslateY(e.getY() - offset.getY());
+//				text.setTranslateX(e.getX() - offset.getX());
+//				text.setTranslateY(e.getY() - offset.getY());
+//				e.consume();
+//			});
 			super.getChildren().add(text);
 			ListeNoms.add(text);
 			svg.setMouseTransparent(true);

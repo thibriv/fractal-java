@@ -1,95 +1,59 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package javafxdragpanzoom.view.controls;
 
-import javafx.event.EventHandler;
-import javafx.scene.input.MouseEvent;
+import fr.liienac.statemachine.DragStateMachine;
 import fr.liienac.statemachine.event.Move;
 import fr.liienac.statemachine.event.Press;
-import fr.liienac.statemachine.event.Release;
 import fr.liienac.statemachine.geometry.Point;
-import javafxdragpanzoom.statemachines.DragStateMachine;
+import javafx.event.EventHandler;
+import javafx.scene.input.MouseDragEvent;
+import javafx.scene.input.MouseEvent;
 import javafxdragpanzoom.view.views.TranslatableHomotheticPane;
+import javafxdragpanzoom.view.views.TranslatableHomotheticPaneGrid;
 
 /**
- * Gestionnaire de Pan des TranslatableHomotheticPane.
- * Responsable de l'écoute des événements javafx sur le TranslatableHomotheticPane dont elle
- * a la charge, cette classe rend ces événements abstraits et les redirige vers
- * une machine à états indépendante de la techno utilisée.
- * @author saporito
+ *
+ * @author erber
  */
 public class PanManager {
     
-    private final DragStateMachine sm = new DragStateMachine();
+    private double xPress;
+    private double yPress;
+    private final DragStateMachine dragMachine;
     
-    /**
-     * Constructeur
-     * @param paneToPan TranslatableHomotheticPane à gérer
-     */
-    public PanManager(TranslatableHomotheticPane paneToPan) {
-        // Solution 1 : 
-        // - écoute du pane en bubbling phase 
-        // - écoute du node en capturing phase (dans NodeInteractionManager) et arrêt de la propagation
-        // Les écouteurs du pane ne seront donc jamais appelés si la cible de l'événement est un node. 
-        paneToPan.addEventHandler(MouseEvent.MOUSE_PRESSED, onMousePressed);
-        paneToPan.addEventHandler(MouseEvent.MOUSE_DRAGGED, onMouseDragged);
-        paneToPan.addEventHandler(MouseEvent.MOUSE_RELEASED, onMouseReleased);
+
+    public PanManager(TranslatableHomotheticPane pane) {
         
-        // Solution 2 :
-        // - écoutes sur n'importe quelle phase
-        // - les écouteurs du pane testent la cible et ne réagissent pas si ce n'est pas le pane
-        // Tous les écouteurs seront donc appelés mais certains "choisiront" de ne pas réagir.
+        dragMachine = new DragStateMachine();
+        
+        EventHandler<MouseEvent> eventPress = new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                xPress = event.getX();
+                yPress = event.getY();
+                Point p = new Point(xPress,yPress);
+                dragMachine.handleEvent(new Press(p,pane));
+            }
+
+        };
+        EventHandler<MouseEvent> eventDrag = new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                double xDrag = event.getX();
+                double yDrag = event.getY();
+                Point p = new Point(xDrag-xPress,yDrag-yPress);
+                dragMachine.handleEvent(new Move(p,pane));
+                //pane.translate(xDrag-xPress, yDrag-yPress);
+            }
+
+        };
+        
+        pane.addEventFilter(MouseEvent.MOUSE_PRESSED, eventPress);
+        pane.addEventFilter(MouseEvent.MOUSE_DRAGGED, eventDrag);
+        
     }
 
-    private final EventHandler<MouseEvent> onMousePressed = new EventHandler<MouseEvent>() {
-        @Override
-        public void handle(MouseEvent ev) {
-            // Solution 2 :
-            // Si la cible n'est pas la source (le widget abonné à ce handler, ici le panAndZoomPane), ne pas gérer le cas.
-            // Il sera géré par un handler spécifique si il y a un autre abonnement (ici chaque Node sur lequel on met en place du d&d dans NodeGestures)
-            if (ev.getTarget() != ev.getSource()) { // on aurait pu tester directement event.getTarget() != panAndZoomPane
-                return;
-            }
-            
-            // Solution 1 : rien à faire ici si ce n'est commenter la solution 2 (événement potentiellement déjà intercepté par le node en capturing phase)
-            
-            // Dans tous les cas :
-            sm.handleEvent(new Press(new Point(ev.getX(), ev.getY()), ev.getSource()));
-            //System.out.println("Mouse pressed on pane");
-        }
-    };
-
-    private final EventHandler<MouseEvent> onMouseDragged = new EventHandler<MouseEvent>() {
-        @Override
-        public void handle(MouseEvent ev) {
-            // Solution 2 :
-            // Si la cible n'est pas la source (le widget abonné à ce handler, ici le panAndZoomPane), ne pas gérer le cas.
-            // Il sera géré par un handler spécifique si il y a un autre abonnement (ici chaque Node sur lequel on met en place du d&d dans NodeGestures)
-            if (ev.getTarget() != ev.getSource()) { // on aurait pu tester directement event.getTarget() != panAndZoomPane
-                return;
-            }
-            
-            // Solution 1 : rien à faire ici si ce n'est commenter la solution 2 (événement potentiellement déjà intercepté par le node en capturing phase)
-            
-            // Dans tous les cas :
-            sm.handleEvent(new Move(new Point(ev.getX(), ev.getY()), ev.getSource()));
-            //System.out.println("Mouse dragged on pane");
-        }
-    };
-    
-    private final EventHandler<MouseEvent> onMouseReleased = new EventHandler<MouseEvent>() {
-        @Override
-        public void handle(MouseEvent ev) {
-            // Solution 2 :
-            // Si la cible n'est pas la source (le widget abonné à ce handler, ici le panAndZoomPane), ne pas gérer le cas.
-            // Il sera géré par un handler spécifique si il y a un autre abonnement (ici chaque Node sur lequel on met en place du d&d dans NodeGestures)
-            if (ev.getTarget() != ev.getSource()) { // on aurait pu tester directement event.getTarget() != panAndZoomPane
-                return;
-            }
-            
-            // Solution 1 : rien à faire ici si ce n'est commenter la solution 2 (événement potentiellement déjà intercepté par le node en capturing phase)
-            
-            // Dans tous les cas :
-            sm.handleEvent(new Release(new Point(ev.getX(), ev.getY()), ev.getSource()));
-            //System.out.println("Mouse released on pane");
-        }
-    };
 }
